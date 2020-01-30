@@ -2441,9 +2441,10 @@ class ISAM2 {
   gtsam::ISAM2Result update(const gtsam::NonlinearFactorGraph& newFactors, const gtsam::Values& newTheta);
   gtsam::ISAM2Result update(const gtsam::NonlinearFactorGraph& newFactors, const gtsam::Values& newTheta, const gtsam::FactorIndices& removeFactorIndices);
   gtsam::ISAM2Result update(const gtsam::NonlinearFactorGraph& newFactors, const gtsam::Values& newTheta, const gtsam::FactorIndices& removeFactorIndices, const gtsam::KeyGroupMap& constrainedKeys);
-  // TODO: wrap the full version of update
- //void update(const gtsam::NonlinearFactorGraph& newFactors, const gtsam::Values& newTheta, const gtsam::KeyVector& removeFactorIndices, FastMap<Key,int>& constrainedKeys);
-  //void update(const gtsam::NonlinearFactorGraph& newFactors, const gtsam::Values& newTheta, const gtsam::KeyVector& removeFactorIndices, FastMap<Key,int>& constrainedKeys, bool force_relinearize);
+  gtsam::ISAM2Result update(const gtsam::NonlinearFactorGraph& newFactors, const gtsam::Values& newTheta, const gtsam::FactorIndices& removeFactorIndices, const gtsam::KeyGroupMap& constrainedKeys, const gtsam::KeyList& noRelinKeys);
+  gtsam::ISAM2Result update(const gtsam::NonlinearFactorGraph& newFactors, const gtsam::Values& newTheta, const gtsam::FactorIndices& removeFactorIndices, const gtsam::KeyGroupMap& constrainedKeys, const gtsam::KeyList& noRelinKeys, const gtsam::KeyList& extraReelimKeys);
+  gtsam::ISAM2Result update(const gtsam::NonlinearFactorGraph& newFactors, const gtsam::Values& newTheta, const gtsam::FactorIndices& removeFactorIndices, const gtsam::KeyGroupMap& constrainedKeys, const gtsam::KeyList& noRelinKeys, const gtsam::KeyList& extraReelimKeys, bool force_relinearize);
+  double error(const gtsam::VectorValues& values) const;
 
   gtsam::Values getLinearizationPoint() const;
   gtsam::Values calculateEstimate() const;
