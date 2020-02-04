@@ -23,11 +23,12 @@ from gtsam.utils.test_case import GtsamTestCase
 
 class TestVisualISAMExample(GtsamTestCase):
 
-    def test_VisualISAMExample(self):
+    def setUp(self):
         # Data Options
         options = generator.Options()
         options.triangle = False
         options.nrCameras = 20
+        self.options = options
 
         # iSAM Options
         isamOptions = visual_isam.Options()
@@ -36,47 +37,67 @@ class TestVisualISAMExample(GtsamTestCase):
         isamOptions.batchInitialization = True
         isamOptions.reorderInterval = 10
         isamOptions.alwaysRelinearize = False
+        self.isamOptions = isamOptions
 
         # Generate data
-        data, truth = generator.generate_data(options)
+        self.data, self.truth = generator.generate_data(options)
 
+    def test_VisualISAMExample(self):
         # Initialize iSAM with the first pose and points
-        isam, result, nextPose = visual_isam.initialize(data, truth, isamOptions)
+        isam, result, nextPose = visual_isam.initialize(self.data,
+                                                        self.truth,
+                                                        self.isamOptions)
 
         # Main loop for iSAM: stepping through all poses
-        for currentPose in range(nextPose, options.nrCameras):
-            isam, result = visual_isam.step(data, isam, result, truth, currentPose)
+        for currentPose in range(nextPose, self.options.nrCameras):
+            isam, result = visual_isam.step(self.data, isam, result,
+                                            self.truth, currentPose)
 
-        for i in range(len(truth.cameras)):
+        for i in range(len(self.truth.cameras)):
             pose_i = result.atPose3(symbol(ord('x'), i))
-            self.gtsamAssertEquals(pose_i, truth.cameras[i].pose(), 1e-5)
+            self.gtsamAssertEquals(pose_i, self.truth.cameras[i].pose(), 1e-5)
 
-        for j in range(len(truth.points)):
+        for j in range(len(self.truth.points)):
             point_j = result.atPoint3(symbol(ord('l'), j))
-            self.gtsamAssertEquals(point_j, truth.points[j], 1e-5)
+            self.gtsamAssertEquals(point_j, self.truth.points[j], 1e-5)
+
+    @unittest.skip("Need to understand how to calculate error using VectorValues correctly")
+    def test_isam2_error(self):
+        #TODO(Varun) fix
+        # Initialize iSAM with the first pose and points
+        isam, result, nextPose = visual_isam.initialize(self.data,
+                                                        self.truth,
+                                                        self.isamOptions)
+
+        # Main loop for iSAM: stepping through all poses
+        for currentPose in range(nextPose, self.options.nrCameras):
+            isam, result = visual_isam.step(self.data, isam, result,
+                                            self.truth, currentPose)
+
+        values = gtsam.VectorValues()
+
+        estimate = isam.calculateBestEstimate()
+
+        keys = estimate.keys()
+
+        for k in range(keys.size()):
+            key = keys.at(k)
+            try:
+                v = estimate.atPose3(key).matrix()
+
+            except RuntimeError:
+                v = estimate.atPoint3(key).vector()
+            values.insert(key, v)
+        # print(isam.error(values))
 
     def test_isam2_update(self):
         """
         Test for full version of ISAM2::update method
         """
-        # Data Options
-        options = generator.Options()
-        options.triangle = False
-        options.nrCameras = 20
-
-        # iSAM Options
-        isamOptions = visual_isam.Options()
-        isamOptions.hardConstraint = False
-        isamOptions.pointPriors = False
-        isamOptions.batchInitialization = True
-        isamOptions.reorderInterval = 10
-        isamOptions.alwaysRelinearize = False
-
-        # Generate data
-        data, truth = generator.generate_data(options)
-
         # Initialize iSAM with the first pose and points
-        isam, result, nextPose = visual_isam.initialize(data, truth, isamOptions)
+        isam, result, nextPose = visual_isam.initialize(self.data,
+                                                        self.truth,
+                                                        self.isamOptions)
 
         remove_factor_indices = gtsam.FactorIndices()
         constrained_keys = gtsam.KeyGroupMap()
@@ -89,16 +110,17 @@ class TestVisualISAMExample(GtsamTestCase):
                     False)
 
         # Main loop for iSAM: stepping through all poses
-        for currentPose in range(nextPose, options.nrCameras):
-            isam, result = visual_isam.step(data, isam, result, truth, currentPose, isamArgs)
+        for currentPose in range(nextPose, self.options.nrCameras):
+            isam, result = visual_isam.step(self.data, isam, result,
+                                            self.truth, currentPose, isamArgs)
 
-        for i in range(len(truth.cameras)):
+        for i in range(len(self.truth.cameras)):
             pose_i = result.atPose3(symbol(ord('x'), i))
-            self.gtsamAssertEquals(pose_i, truth.cameras[i].pose(), 1e-5)
+            self.gtsamAssertEquals(pose_i, self.truth.cameras[i].pose(), 1e-5)
 
-        for j in range(len(truth.points)):
+        for j in range(len(self.truth.points)):
             point_j = result.atPoint3(symbol(ord('l'), j))
-            self.gtsamAssertEquals(point_j, truth.points[j], 1e-5)
+            self.gtsamAssertEquals(point_j, self.truth.points[j], 1e-5)
 
 
 if __name__ == "__main__":
