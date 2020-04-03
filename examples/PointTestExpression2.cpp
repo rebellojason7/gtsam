@@ -80,19 +80,24 @@ int main(int argc, char* argv[]) {
   
   // Add prior on 3 points to constrain it
   noiseModel::Isotropic::shared_ptr pointNoise = noiseModel::Isotropic::Sigma(3, 0.01);
-  for(size_t i=0; i<3; i++){
-    graph.addExpressionFactor(Point3_('l',i), points[i], pointNoise); // add directly to graph
+  vector<int> prior_idxs = {0,1,2,3,4,6};
+  for(size_t i=0; i<prior_idxs.size(); i++){
+    int id = prior_idxs[i];
+    graph.addExpressionFactor(Point3_('l',id), points[id], pointNoise); // add directly to graph
   }
 
-  
   auto odometryNoise = noiseModel::Diagonal::Sigmas(Vector3(0.4, 0.4, 0.4));
-  for(size_t i=0; i<=6; i++){
+  auto odometryNoise_dist = noiseModel::Diagonal::Sigmas(Vector1(0.001));
+  for(size_t i=0; i<=6; i++){ // Go through points 1-6, not 7 since all edges already exhausted
     int num_edges = mapping[i].size();
     for(size_t j=0; j<num_edges; j++){
       int idx_i = i;
       int idx_j = mapping[i][j];
       Point3 measurement = points[idx_j] - points[i];
-      graph.addExpressionFactor(between(Point3_('l',idx_i), Point3_('l',idx_j)), measurement, odometryNoise);
+      auto h = Double_(&distance3, Point3_('l',idx_i), Point3_('l',idx_j));
+      double measurement_dist = distance3(points[idx_j], points[i]);
+      //graph.addExpressionFactor(between(Point3_('l',idx_i), Point3_('l',idx_j)), measurement, odometryNoise);
+      graph.addExpressionFactor(h, measurement_dist, odometryNoise_dist);
     }
   }
   
