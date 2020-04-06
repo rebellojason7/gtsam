@@ -14,14 +14,17 @@ int main (int argc, char* argv[])
   	// Find default file, but if an argument is given, try loading a file
   	//string filename = "/home/jrebello/projects/gtsam/examples/Data/dubrovnik-3-7-pre.txt";
   
-  	string noisy_filename = "/home/jrebello/catkin_ws/src/acdcc_slam/data/marker_true_bal.txt";
+  	string noisy_filename = "/home/jrebello/catkin_ws/src/acdcc_slam/data/marker_noisy_bal.txt";
   	string true_filename = "/home/jrebello/catkin_ws/src/acdcc_slam/data/marker_true_bal.txt";
   	double sq_size = 0.16;
   	//if (argc>1) filename = string(argv[1]);
 
   	//boost::shared_ptr<Cal3DS2> K(new Cal3DS2(863.64399, 862.81874, 0, 639.69557, 363.08595, -0.00206, 0.00042, -0.00021, 0.000230));
-	Cal3DS2 K(863.64399, 862.81874, 0, 639.69557, 363.08595, -0.00206, 0.00042, -0.00021, 0.000230);
-	Cal3DS2_ ck(K);
+	//Cal3DS2 K(863.64399, 862.81874, 0, 639.69557, 363.08595, -0.00206, 0.00042, -0.00021, 0.000230);
+	//Cal3DS2_ cK(K);
+
+	Cal3_S2 K(863.64399, 862.81874, 0, 639.69557, 363.08595);
+	Cal3_S2_ cK(K);
 
   	// Load the SfM data from file
   	SfM_data noisydata, truedata;
@@ -57,7 +60,7 @@ int main (int argc, char* argv[])
     	{
       		size_t camera_idx = noisydata.pt_tracks[t].measurements[m].first; 
       		Point2 uv = noisydata.pt_tracks[t].measurements[m].second;
-			Point2_ prediction = project(transformTo(Pose3_('x',camera_idx),Point3_('p',point_idx)));
+			//Point2_ prediction = uncalibrate( cK, project( transformTo( Pose3_('x',camera_idx), Point3_('p',point_idx) ) ) );
 			graph.addExpressionFactor(prediction, uv, pixelNoise);
 			//total_error += (Point2_(uv)-prediction);
 			//std::cout << uv.x << " " << uv.y << std::endl;

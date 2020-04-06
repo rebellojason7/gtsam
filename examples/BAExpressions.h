@@ -25,7 +25,7 @@ using namespace gtsam;
 // Define Pinhole camera model with distortion
 typedef gtsam::PinholeCamera<Cal3DS2> PinholeCamera_Cal3DS2;
 
-typedef Expression<Cal3DS2> Cal3DS2_;
+//typedef Expression<Cal3DS2> Cal3DS2_;
 
 // Camera ID with pixel measurement
 typedef std::pair<size_t, Point2> SfM_Measurement;
