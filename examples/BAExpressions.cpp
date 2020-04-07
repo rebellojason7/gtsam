@@ -60,7 +60,7 @@ int main (int argc, char* argv[])
     	{
       		size_t camera_idx = noisydata.pt_tracks[t].measurements[m].first; 
       		Point2 uv = noisydata.pt_tracks[t].measurements[m].second;
-			//Point2_ prediction = uncalibrate( cK, project( transformTo( Pose3_('x',camera_idx), Point3_('p',point_idx) ) ) );
+			Point2_ prediction = uncalibrate( cK, project( transformTo( Pose3_('x',camera_idx), Point3_('p',point_idx) ) ) );
 			graph.addExpressionFactor(prediction, uv, pixelNoise);
 			//total_error += (Point2_(uv)-prediction);
 			//std::cout << uv.x << " " << uv.y << std::endl;
